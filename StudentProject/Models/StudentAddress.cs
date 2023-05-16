@@ -8,9 +8,10 @@
         public string Address2 { get; set; }
         public string City { get; set; }
         public string State { get; set; }
+        public int PinCode { get; set; }
 
         // Navigational Properties
-        public Nullable<int> StudentId { get; set; }
+        public int StudentId { get; set; }
         public virtual Student student { get; set; } = null;
     }
 }

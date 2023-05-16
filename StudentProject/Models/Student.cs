@@ -7,9 +7,10 @@ namespace StudentProject.Models
     {
         public Student()
         {
-           /* this.Courses = new HashSet<Course>();
-            this.studentAddress = null;
-            this.standard = null;*/
+            /* this.Courses = new HashSet<Course>();
+             this.studentAddress = null;
+             this.standard = null;*/
+             
         }
         // Properties of the class
         public int Id { get; set; }
@@ -38,6 +39,9 @@ namespace StudentProject.Models
         public Nullable<int> StandardId { get; set; }
         [JsonIgnore]
         public Standard standard { get; set; } = null;*/
+
+
+        public StudentAddress studentAddress { get; set; } = null;
         
 
     }
