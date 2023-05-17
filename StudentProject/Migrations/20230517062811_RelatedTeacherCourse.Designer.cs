@@ -11,8 +11,8 @@ using StudentProject.Repository;
 namespace StudentProject.Migrations
 {
     [DbContext(typeof(SchoolDbContext))]
-    [Migration("20230516122446_addedStudentAddressRelation")]
-    partial class addedStudentAddressRelation
+    [Migration("20230517062811_RelatedTeacherCourse")]
+    partial class RelatedTeacherCourse
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,6 +21,54 @@ namespace StudentProject.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            modelBuilder.Entity("StudentProject.Models.Course", b =>
+                {
+                    b.Property<int>("CourseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("CourseName")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CourseId");
+
+                    b.HasIndex("CourseName")
+                        .IsUnique();
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("StudentProject.Models.Standard", b =>
+                {
+                    b.Property<int>("StandardId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("StandardDescription")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("StandardName")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("StandardId");
+
+                    b.HasIndex("StandardName")
+                        .IsUnique();
+
+                    b.ToTable("standards");
+                });
 
             modelBuilder.Entity("StudentProject.Models.Student", b =>
                 {
@@ -49,6 +97,9 @@ namespace StudentProject.Migrations
                     b.Property<int>("RollNo")
                         .HasColumnType("int");
 
+                    b.Property<int>("StandardId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("StudentDateOfBirth")
                         .HasColumnType("datetime(6)");
 
@@ -59,6 +110,8 @@ namespace StudentProject.Migrations
 
                     b.HasIndex("RollNo")
                         .IsUnique();
+
+                    b.HasIndex("StandardId");
 
                     b.ToTable("Students");
                 });
@@ -118,6 +171,9 @@ namespace StudentProject.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("varchar(10)");
 
+                    b.Property<int>("StandardId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Subject")
                         .HasColumnType("longtext");
 
@@ -133,7 +189,31 @@ namespace StudentProject.Migrations
                     b.HasIndex("MobNo")
                         .IsUnique();
 
-                    b.ToTable("Teacher");
+                    b.HasIndex("StandardId");
+
+                    b.ToTable("Teachers");
+                });
+
+            modelBuilder.Entity("StudentProject.Models.Course", b =>
+                {
+                    b.HasOne("StudentProject.Models.Teacher", "teacher")
+                        .WithMany("Courses")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("teacher");
+                });
+
+            modelBuilder.Entity("StudentProject.Models.Student", b =>
+                {
+                    b.HasOne("StudentProject.Models.Standard", "Standard")
+                        .WithMany("Students")
+                        .HasForeignKey("StandardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Standard");
                 });
 
             modelBuilder.Entity("StudentProject.Models.StudentAddress", b =>
@@ -147,10 +227,33 @@ namespace StudentProject.Migrations
                     b.Navigation("student");
                 });
 
+            modelBuilder.Entity("StudentProject.Models.Teacher", b =>
+                {
+                    b.HasOne("StudentProject.Models.Standard", "standard")
+                        .WithMany("Teachers")
+                        .HasForeignKey("StandardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("standard");
+                });
+
+            modelBuilder.Entity("StudentProject.Models.Standard", b =>
+                {
+                    b.Navigation("Students");
+
+                    b.Navigation("Teachers");
+                });
+
             modelBuilder.Entity("StudentProject.Models.Student", b =>
                 {
                     b.Navigation("studentAddress")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("StudentProject.Models.Teacher", b =>
+                {
+                    b.Navigation("Courses");
                 });
 #pragma warning restore 612, 618
         }

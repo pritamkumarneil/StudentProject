@@ -17,7 +17,6 @@ namespace StudentProject.Transformer
             student.EmailId= studentRequestDto.EmailId; 
             student.MobNo= studentRequestDto.MobNo;
             student.Age = studentRequestDto.Age;
-            student.RollNo = studentRequestDto.RollNo;
             student.StudentDateOfBirth = studentRequestDto.StudentDateOfBirth;
             return student;
         }

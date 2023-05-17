@@ -6,8 +6,8 @@
         public string EmailId { get; set; }=String.Empty;
         public string MobNo { get; set; }=string.Empty; 
         public int Age { get; set; }
-        public int RollNo { get; set; }
         public string Branch { get; set; } = string.Empty;
         public DateTime StudentDateOfBirth { get; set; }
+        public string StandardName { get; set; }
     }
 }

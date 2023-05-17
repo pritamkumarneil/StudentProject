@@ -10,7 +10,7 @@ namespace StudentProject.Controllers
     [ApiController]
     public class StudentController : ControllerBase
     {
-        IStudentService studentService;
+        readonly IStudentService studentService;
         public StudentController(IStudentService studentService)
         {
             this.studentService=studentService;
@@ -47,5 +47,10 @@ namespace StudentProject.Controllers
             StudentResponseDto studentResponseDto= studentService.DeleteStudent(id);
             return Ok(studentResponseDto);
         }
+        // add student to given Addresss
+        // add student to given standard
+        // add student to given course
+        // get all student from given City
+        // get all courses opted by the student(by emailId)
     }
 }

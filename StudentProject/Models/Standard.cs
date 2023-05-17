@@ -13,7 +13,8 @@
         public string StandardDescription { get; set; }
 
         //Navigational Properties
-        public virtual ICollection<Teacher> Teachers { get; set; }
+        //public virtual ICollection<Teacher> Teachers { get; set; }
         public virtual ICollection<Student> Students { get; set; }
+        public virtual ICollection<Teacher> Teachers { get; set; }
     }
 }

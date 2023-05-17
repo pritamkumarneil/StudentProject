@@ -10,6 +10,7 @@ namespace StudentProject.Models
             /* this.Courses = new HashSet<Course>();
              this.studentAddress = null;
              this.standard = null;*/
+            this.StudentCourses = new HashSet<StudentCourse>();
              
         }
         // Properties of the class
@@ -42,7 +43,10 @@ namespace StudentProject.Models
 
 
         public StudentAddress studentAddress { get; set; } = null;
+        public int StandardId { get; set; }
+        public Standard Standard { get; set; } = null;
         
+        public virtual ICollection<StudentCourse> StudentCourses { get; set; }
 
     }
 }

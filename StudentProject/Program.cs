@@ -23,7 +23,10 @@ var builder = WebApplication.CreateBuilder(args);
 
         // registering the StudentService in ioc container
         builder.Services.Add(new ServiceDescriptor(typeof(IStudentService), new StudentService(schoolDbContext)));
-
+        builder.Services.Add(new ServiceDescriptor(typeof(ITeacherService), new TeacherService(schoolDbContext)));
+        builder.Services.Add(new ServiceDescriptor(typeof(ICourseService), new CourseService(schoolDbContext)));
+        builder.Services.Add(new ServiceDescriptor(typeof(IStandardService), new StandardService(schoolDbContext)));
+        builder.Services.Add(new ServiceDescriptor(typeof(IStudentAddressService), new StudentAddressService(schoolDbContext)));
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

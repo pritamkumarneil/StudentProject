@@ -7,7 +7,9 @@ namespace StudentProject.Models
     {
         public Course()
         {
-            this.Students = new HashSet<Student>();
+            //this.Students = new HashSet<Student>();
+            this.StudentCourses = new HashSet<StudentCourse>();
+
         }
         // Properties of the class
         public int CourseId { get; set; }
@@ -16,13 +18,15 @@ namespace StudentProject.Models
         //public System.Data.Entity.Spatial.DbGeography Location { get; set; }
 
         // Navigational Properties
-        [ForeignKey("Teacher")]
+        /*[ForeignKey("Teacher")]
         public Nullable<int> TeacherId { get; set; }// teacher is parent to this class so (FK)
         [JsonIgnore]
         public Teacher Teacher { get; set; } = null;
         [JsonIgnore]
-        public virtual ICollection<Student> Students { get; set; }
+        public virtual ICollection<Student> Students { get; set; }*/
 
-
+        public int TeacherId { get; set; } 
+        public Teacher teacher { get; set; }
+        public virtual ICollection<StudentCourse> StudentCourses { get; set; }
     }
 }

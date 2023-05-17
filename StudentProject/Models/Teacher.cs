@@ -4,7 +4,7 @@
     {
         public Teacher()
         {
-            //this.Courses = new HashSet<Course>();
+            this.Courses = new HashSet<Course>();
            // this.Students = new HashSet<Student>();
         }
         // Properties of the class
@@ -25,9 +25,11 @@
 
         // Navigational Properties
         //public virtual ICollection<Course> Courses { get; set; }
-        /*public Nullable<int> StandardId { get; set; }
-        public Standard standard { get; set; } = null;*/
         //public virtual ICollection<Student> Students { get; set; };
-        
+        public int StandardId { get; set; }
+        public Standard standard { get; set; } = null;
+
+        public virtual ICollection<Course> Courses { get; set; }
+
     }
 }
