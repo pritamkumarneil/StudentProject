@@ -19,9 +19,12 @@ namespace StudentProject.Repository
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-           /* modelBuilder.Entity<Student>()
-                .HasIndex(e => e.RollNo)
-                .IsUnique();*/
+            /* modelBuilder.Entity<Student>()
+                 .HasIndex(e => e.RollNo)
+                 .IsUnique();*/
+            modelBuilder.Entity<Student>()
+                 .HasIndex(e => e.MobNo)
+                 .IsUnique();
             modelBuilder.Entity<Student>()
                 .Property(s => s.MobNo)
                 .HasMaxLength(10);

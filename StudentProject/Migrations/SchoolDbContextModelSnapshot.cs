@@ -64,7 +64,7 @@ namespace StudentProject.Migrations
                     b.HasIndex("StandardName")
                         .IsUnique();
 
-                    b.ToTable("standards");
+                    b.ToTable("Standards");
                 });
 
             modelBuilder.Entity("StudentProject.Models.Student", b =>
@@ -105,7 +105,7 @@ namespace StudentProject.Migrations
                     b.HasIndex("EmailId")
                         .IsUnique();
 
-                    b.HasIndex("RollNo")
+                    b.HasIndex("MobNo")
                         .IsUnique();
 
                     b.HasIndex("StandardId");
@@ -146,7 +146,7 @@ namespace StudentProject.Migrations
                     b.HasIndex("StudentId")
                         .IsUnique();
 
-                    b.ToTable("studentAddresses");
+                    b.ToTable("StudentAddresses");
                 });
 
             modelBuilder.Entity("StudentProject.Models.StudentCourse", b =>

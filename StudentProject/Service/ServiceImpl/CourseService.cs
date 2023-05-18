@@ -55,7 +55,7 @@ namespace StudentProject.Service.ServiceImpl
         {
              if(schoolDbContext.Courses == null)
                 throw new CourseNotFound("No Course Available");
-            Course course = schoolDbContext.Courses.Find(id);
+            Course course = schoolDbContext.Courses.Where(x=>x.CourseId==id).Include(x => x.teacher).FirstOrDefault();
             if (course == null)
                 throw new CourseNotFound("No course Available with given Id");
             return CourseTransformer.CourseToCourseResponseDto(course);
@@ -74,8 +74,8 @@ namespace StudentProject.Service.ServiceImpl
             }*/
             // this can be easily acheived by using teacher Dbset but here i just wanted to use 
             // raw sql query
-            string sqlQuery = "SELECT * FROM courses c WHERE c.TeacherId=" + teacherId.ToString() + ";";
-            List<Course> courses = schoolDbContext.Courses.FromSqlRaw(sqlQuery).ToList();
+            string sqlQuery = "SELECT * FROM courses c WHERE c.TeacherId=" + teacherId.ToString();
+            List<Course> courses = schoolDbContext.Courses.FromSqlRaw(sqlQuery).Include(x=>x.teacher).ToList();
             List<CourseResponseDto> ans = new List<CourseResponseDto>();
             foreach(Course course in courses)
             {

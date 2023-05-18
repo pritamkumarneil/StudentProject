@@ -11,8 +11,8 @@ using StudentProject.Repository;
 namespace StudentProject.Migrations
 {
     [DbContext(typeof(SchoolDbContext))]
-    [Migration("20230517062811_RelatedTeacherCourse")]
-    partial class RelatedTeacherCourse
+    [Migration("20230518105312_final")]
+    partial class final
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -67,7 +67,7 @@ namespace StudentProject.Migrations
                     b.HasIndex("StandardName")
                         .IsUnique();
 
-                    b.ToTable("standards");
+                    b.ToTable("Standards");
                 });
 
             modelBuilder.Entity("StudentProject.Models.Student", b =>
@@ -108,7 +108,7 @@ namespace StudentProject.Migrations
                     b.HasIndex("EmailId")
                         .IsUnique();
 
-                    b.HasIndex("RollNo")
+                    b.HasIndex("MobNo")
                         .IsUnique();
 
                     b.HasIndex("StandardId");
@@ -149,7 +149,22 @@ namespace StudentProject.Migrations
                     b.HasIndex("StudentId")
                         .IsUnique();
 
-                    b.ToTable("studentAddresses");
+                    b.ToTable("StudentAddresses");
+                });
+
+            modelBuilder.Entity("StudentProject.Models.StudentCourse", b =>
+                {
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.HasKey("StudentId", "CourseId");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("StudentCourses");
                 });
 
             modelBuilder.Entity("StudentProject.Models.Teacher", b =>
@@ -227,6 +242,25 @@ namespace StudentProject.Migrations
                     b.Navigation("student");
                 });
 
+            modelBuilder.Entity("StudentProject.Models.StudentCourse", b =>
+                {
+                    b.HasOne("StudentProject.Models.Course", "course")
+                        .WithMany("StudentCourses")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StudentProject.Models.Student", "student")
+                        .WithMany("StudentCourses")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("course");
+
+                    b.Navigation("student");
+                });
+
             modelBuilder.Entity("StudentProject.Models.Teacher", b =>
                 {
                     b.HasOne("StudentProject.Models.Standard", "standard")
@@ -238,6 +272,11 @@ namespace StudentProject.Migrations
                     b.Navigation("standard");
                 });
 
+            modelBuilder.Entity("StudentProject.Models.Course", b =>
+                {
+                    b.Navigation("StudentCourses");
+                });
+
             modelBuilder.Entity("StudentProject.Models.Standard", b =>
                 {
                     b.Navigation("Students");
@@ -247,6 +286,8 @@ namespace StudentProject.Migrations
 
             modelBuilder.Entity("StudentProject.Models.Student", b =>
                 {
+                    b.Navigation("StudentCourses");
+
                     b.Navigation("studentAddress")
                         .IsRequired();
                 });

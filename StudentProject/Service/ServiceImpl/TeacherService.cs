@@ -36,7 +36,7 @@ namespace StudentProject.Service.ServiceImpl
 
         public string AddTeacherToStandard(string StandardName,int teacherId)
         {
-            string sqlQuery = "SELECT * FROM standards s WHERE s.StandardName="+StandardName+";";
+            string sqlQuery = "SELECT * FROM standards s WHERE s.StandardName="+StandardName;
             Standard standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).First();
             if (standard == null)
                 throw new StandardNotFoundException("No standard available with name" + StandardName);

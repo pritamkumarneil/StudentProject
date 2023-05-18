@@ -26,6 +26,7 @@ namespace StudentProject.Transformer
 
             studentResponseDto.RollNo = student.RollNo;
             studentResponseDto.Name = student.Name;
+            studentResponseDto.StandardName = student.Standard==null? "":student.Standard.StandardName;
 
             return studentResponseDto;
         }

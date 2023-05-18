@@ -29,22 +29,25 @@ namespace StudentProject.Service.ServiceImpl
             // first fetch the Standard and also take standardName input
             // in order to give him a unique roll no
 
-            // also add this student int  STudentCourse Table
-
             string standardName=studentRequestDto.StandardName;
-            string sqlQuery = "SELECT * FROM standards s WHERE s.StandardName=" + standardName + ";";
-            Standard standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).First();
+            string sqlQuery = "SELECT * FROM standards s WHERE s.StandardName=" + standardName;
+            Standard standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).Include(x=>x.Students).FirstOrDefault();
             if (standard == null)
                 throw new StandardNotFoundException("Standard Not found");
 
-            int rollNo = standard.Students.Count;
+            int NewRollNo = standard.Students.Count + 1;
 
             Student student = StudentTransformer.StudentRequestDtoToStudent(studentRequestDto);
 
-            student.RollNo = rollNo + 1;
-            schoolDbContext.Students.Add(student);
-            schoolDbContext.SaveChangesAsync();
-            return StudentTransformer.StudentToStudentResponseDto(student);
+            student.RollNo = NewRollNo;
+            standard.Students.Add(student);// adding the student
+            student.Standard = standard;
+            //schoolDbContext.Students.Add(student);
+            //schoolDbContext.Standards.Update(standard);
+            schoolDbContext.SaveChanges();
+            StudentResponseDto response= StudentTransformer.StudentToStudentResponseDto(student);
+            response.message = "list Size " + standard.Students.Count+ "\n standard name : "+student.Standard.StandardName;
+            return response;
         }
 
         public StudentResponseDto GetStudent(int id)
@@ -164,22 +167,94 @@ namespace StudentProject.Service.ServiceImpl
 
             return student.Name + " belongs to " + address.City;
         }
-        public string AddStudentToCourse(string standardName, int rollNo, string CourseName)
+        public string AddStudentToCourse(string standardName, int rollNo, string courseName)
         {
-           // find standard
-           // find student from the list having given roll no
-           // find course from course name
-           // then add student 
+            // find standard
+            string sqlQuery = "SELECT * FROM standards s WHERE s.StandardName='"+standardName+"'";
+            Standard standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).Include(x=>x.Students).FirstOrDefault();
+            if (standard == null)
+                throw new NoStandardsAvailableException("No such standard available yet");
+            // find student from the list having given roll no
+            Student student=null;
+           foreach(Student student1 in standard.Students.ToList()){
+                if (student1.RollNo == rollNo)
+                {
+                    student = student1;
+                    break;
+                }
+            }
+           if(student==null)
+            {
+                throw new StudentNotFoundException("No student available with the Roll No " + rollNo);
+            }
+            // find course from course name
+            string sqlQuery1= "select * from courses where CourseName ='" + courseName +"'";
+            Course course = schoolDbContext.Courses.Where(x=>x.CourseName==courseName).FirstOrDefault();
+            if (course == null)
+                throw new CourseNotFound("Course Not Found with Name: " + courseName);
+            // find the StudentCourse in the navigation list of student 
+            StudentCourse courseByStudent = new StudentCourse() ;
+
+            // Now add Student to this (relationTable)
+            courseByStudent.student = student;
+            student.StudentCourses.Add(courseByStudent);
+
+            // Now Add Course to this (relation Table)
+            courseByStudent.course = course;
+            course.StudentCourses.Add(courseByStudent);
+            schoolDbContext.Courses.Update(course);
+
+            schoolDbContext.SaveChanges();
+
+            return student.Name + " has been Added to " + course.CourseName + " taught by " + course.teacher.TeacherName;
         }
 
         public List<StudentResponseDto> GetAllStudentFromCity(string city)
         {
-            throw new NotImplementedException();
+            string sqlQuery = "SELECT * FROM studentaddresses s WHERE s.City='" + city+"'" ;
+            List<StudentAddress> addresses;
+            try
+            {
+                addresses = schoolDbContext.StudentAddresses.FromSqlRaw(sqlQuery).Include(x=>x.student).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("sqlQuery is not working "+sqlQuery);
+            }
+
+            if (addresses.Count == 0)
+                throw new StudentAddressNotFound("No student from city " + city + " available.");
+            List<StudentResponseDto> ans = new List<StudentResponseDto>();
+            foreach (StudentAddress address in addresses)
+            {
+                try
+                {
+                    ans.Add(StudentTransformer.StudentToStudentResponseDto(address.student));
+
+                }
+                catch(Exception e)
+                {
+                    throw new Exception("student object have some null value ");
+                }
+            }
+            return ans;
         }
 
         public List<CourseResponseDto> GetAllCoursesByStudent(string emailId)
         {
-            throw new NotImplementedException();
+            string sqlQuery = "SELECT * FROM students s WHERE s.EmailId=" + emailId ;
+            Student student = schoolDbContext.Students.FromSqlRaw(sqlQuery).First();
+            if (student == null)
+            {
+                throw new StudentNotFoundException("No student found with email " + emailId);
+            }
+            List<CourseResponseDto> ans = new List<CourseResponseDto>();
+            
+            foreach(StudentCourse courseByStudent in student.StudentCourses)
+            {
+                ans.Add(CourseTransformer.CourseToCourseResponseDto(courseByStudent.course));
+            }
+            return ans;
         }
     }
 }

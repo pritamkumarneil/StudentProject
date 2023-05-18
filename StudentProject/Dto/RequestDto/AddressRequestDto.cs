@@ -7,5 +7,7 @@
         public string City { get; set; }
         public string State { get; set; }
         public int PinCode { get; set; }
+        public string standardName { get; set; }
+        public int StudentRollNo { get; set; }
     }
 }

@@ -16,7 +16,8 @@ namespace StudentProject.Transformer
         public static StandardResponseDto StandardToStandardResponseDto(Standard standard)
         {
             StandardResponseDto standardResponseDto = new StandardResponseDto();
-            standardResponseDto.Message="Standard Updated Successfully";
+            standardResponseDto.StandardName = standard.StandardName;
+            standardResponseDto.Message =" ";
             return standardResponseDto;
 
         }

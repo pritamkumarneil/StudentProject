@@ -18,9 +18,13 @@ namespace StudentProject.Controllers
         [HttpPost("Add")]
         public async Task<ActionResult<StudentResponseDto>> PostStudent(StudentRequestDto studentRequestDto)
         {
-            StudentResponseDto studentResponseDto= studentService.AddStudent(studentRequestDto);
-            studentResponseDto.message = "Student Added Succesfully";
-            return Ok(studentResponseDto);
+            try
+            {
+                StudentResponseDto studentResponseDto = studentService.AddStudent(studentRequestDto);
+                //studentResponseDto.message = "Student Added Succesfully";
+                return Ok(studentResponseDto);
+            }
+            catch(Exception e) { return BadRequest(e.Message); }
         }
         [HttpGet("GetAll")]
         public async Task<ActionResult<IEnumerable<StudentResponseDto>>> GetAllStudents()
@@ -48,9 +52,47 @@ namespace StudentProject.Controllers
             return Ok(studentResponseDto);
         }
         // add student to given Addresss
-        // add student to given standard
+        [HttpPut("add-student-to-address")]
+        public async Task<ActionResult<string>> addStudentToAddress(int addressId,int studentId)
+        {
+            try
+            {
+                string ans = studentService.AddStudentToAddress(addressId, studentId);
+                return Ok(ans);
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
         // add student to given course
+        [HttpPut("add-student-to-course")]
+        public async Task<ActionResult<string>> AddStudentToCourse(string standardName, int rollNo, string CourseName)
+        {
+            try
+            {
+                string response = studentService.AddStudentToCourse(standardName, rollNo, CourseName);
+                return Ok(response);
+            }
+            catch(Exception e)
+            {
+                return NotFound(e.Message);
+            }
+        }
         // get all student from given City
+        [HttpGet("get-all-student-from-city")]
+        public  async Task<ActionResult<IEnumerable<StudentResponseDto>>> GetAllStudentFromCity(string city)
+        {
+            try
+            {
+                List<StudentResponseDto> students = studentService.GetAllStudentFromCity(city);
+                return Ok(students);
+            }
+            catch(Exception e)
+            {
+                return NotFound(e.Message);
+            }
+        }
         // get all courses opted by the student(by emailId)
     }
 }
