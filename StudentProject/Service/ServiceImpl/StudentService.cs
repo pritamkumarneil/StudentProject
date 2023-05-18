@@ -189,7 +189,7 @@ namespace StudentProject.Service.ServiceImpl
             }
             // find course from course name
             string sqlQuery1= "select * from courses where CourseName ='" + courseName +"'";
-            Course course = schoolDbContext.Courses.Where(x=>x.CourseName==courseName).FirstOrDefault();
+            Course course = schoolDbContext.Courses.Where(x=>x.CourseName==courseName).Include(x=>x.teacher).FirstOrDefault();
             if (course == null)
                 throw new CourseNotFound("Course Not Found with Name: " + courseName);
             // find the StudentCourse in the navigation list of student 
@@ -202,9 +202,16 @@ namespace StudentProject.Service.ServiceImpl
             // Now Add Course to this (relation Table)
             courseByStudent.course = course;
             course.StudentCourses.Add(courseByStudent);
-            schoolDbContext.Courses.Update(course);
+            try
+            {
+                schoolDbContext.Courses.Update(course);
+                schoolDbContext.SaveChanges();
+            }
+            catch(Exception e)
+            {
+                throw new Exception(student.Name + " found and course- " + course.CourseName + "teacher name" + course.teacher.TeacherName);
+            }
 
-            schoolDbContext.SaveChanges();
 
             return student.Name + " has been Added to " + course.CourseName + " taught by " + course.teacher.TeacherName;
         }
