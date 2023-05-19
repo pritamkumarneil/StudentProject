@@ -9,5 +9,6 @@ namespace StudentProject.Service
         public List<CourseResponseDto> GetAllCourses();
         public CourseResponseDto GetCourseById(int id);
         public List<CourseResponseDto> GetAllCourseByTeacherId(int teacherId);
+        public List<StudentResponseDto> GetAllStudentsByCourseName(string courseName);
     }
 }

@@ -12,7 +12,7 @@ namespace StudentProject.Service.ServiceImpl
 {
     public class StudentService : IStudentService
     {
-        private  SchoolDbContext schoolDbContext;
+        private readonly  SchoolDbContext schoolDbContext;
         public StudentService(SchoolDbContext schoolDbContext)
         {
             this.schoolDbContext = schoolDbContext;
@@ -31,7 +31,7 @@ namespace StudentProject.Service.ServiceImpl
 
             string standardName=studentRequestDto.StandardName;
             string sqlQuery = "SELECT * FROM standards s WHERE s.StandardName=" + standardName;
-            Standard standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).Include(x=>x.Students).FirstOrDefault();
+            Standard? standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).Include(x=>x.Students).FirstOrDefault();
             if (standard == null)
                 throw new StandardNotFoundException("Standard Not found");
 
@@ -58,7 +58,7 @@ namespace StudentProject.Service.ServiceImpl
                 studentResponseDto.message = "Student Doesnt Exist";
                 return studentResponseDto;
             }
-            Student student = schoolDbContext.Students.Find(id);
+            Student? student = schoolDbContext.Students.Find(id);
 
             if (student == null)
             {
@@ -79,7 +79,7 @@ namespace StudentProject.Service.ServiceImpl
                 return studentResponseDto;
 
             }
-            Student student = schoolDbContext.Students.Find(id);
+            Student? student = schoolDbContext.Students.Find(id);
 
             if (student == null)
             {
@@ -87,8 +87,8 @@ namespace StudentProject.Service.ServiceImpl
                 studentResponseDto.message = "Student Doesnt Exist";
                 return studentResponseDto;
             }
-            string oldName = student.Name;
-            student.Name = studentRequestDto.Name.Equals("") ? student.Name : studentRequestDto.Name;
+            string oldName = student.Name!;
+            student.Name = studentRequestDto.Name!.Equals("") ? student.Name : studentRequestDto.Name;
             student.Age = studentRequestDto.Age == 0 ? student.Age : studentRequestDto.Age;
             student.EmailId = studentRequestDto.EmailId == string.Empty ? student.EmailId : studentRequestDto.EmailId;
             student.MobNo = studentRequestDto.MobNo == string.Empty ? student.MobNo : studentRequestDto.MobNo;
@@ -133,7 +133,7 @@ namespace StudentProject.Service.ServiceImpl
                 ans.message = "Invalid Id";
                 return ans;
             }
-            Student student = studentRepository.Find(id);
+            Student? student = studentRepository.Find(id);
             if (student == null)
             {
                 ans = new StudentResponseDto();
@@ -154,10 +154,10 @@ namespace StudentProject.Service.ServiceImpl
             if (schoolDbContext.StudentAddresses == null)
                 throw new StudentAddressNotFound("Add Address first");
 
-            StudentAddress address = schoolDbContext.StudentAddresses.Find(addressId);
+            StudentAddress? address = schoolDbContext.StudentAddresses.Find(addressId);
             if (address == null)
                 throw new StudentAddressNotFound("Address Not found with given id "+addressId);
-            Student student = schoolDbContext.Students.Find(studentId);
+            Student? student = schoolDbContext.Students.Find(studentId);
             if (student == null)
                 throw new StudentNotFoundException("no student availabe with given id " + studentId);
             address.student = student;
@@ -171,7 +171,7 @@ namespace StudentProject.Service.ServiceImpl
         {
             // find standard
             string sqlQuery = "SELECT * FROM standards s WHERE s.StandardName='"+standardName+"'";
-            Standard standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).Include(x=>x.Students).FirstOrDefault();
+            Standard? standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).Include(x=>x.Students).FirstOrDefault();
             if (standard == null)
                 throw new NoStandardsAvailableException("No such standard available yet");
             // find student from the list having given roll no
@@ -189,7 +189,7 @@ namespace StudentProject.Service.ServiceImpl
             }
             // find course from course name
             string sqlQuery1= "select * from courses where CourseName ='" + courseName +"'";
-            Course course = schoolDbContext.Courses.Where(x=>x.CourseName==courseName).Include(x=>x.teacher).FirstOrDefault();
+            Course? course = schoolDbContext.Courses.Where(x=>x.CourseName==courseName).Include(x=>x.teacher).FirstOrDefault();
             if (course == null)
                 throw new CourseNotFound("Course Not Found with Name: " + courseName);
             // find the StudentCourse in the navigation list of student 
@@ -209,7 +209,7 @@ namespace StudentProject.Service.ServiceImpl
             }
             catch(Exception e)
             {
-                throw new Exception(student.Name + " found and course- " + course.CourseName + "teacher name" + course.teacher.TeacherName);
+                throw new StudentAlreadyPresentException(student.Name + "already found with course- " + course.CourseName + "teacher name" + course.teacher.TeacherName);
             }
 
 
@@ -226,7 +226,7 @@ namespace StudentProject.Service.ServiceImpl
             }
             catch (Exception ex)
             {
-                throw new Exception("sqlQuery is not working "+sqlQuery);
+                throw new AddressNotFound("sqlQuery is not working "+sqlQuery);//just for testing purpose
             }
 
             if (addresses.Count == 0)
@@ -241,7 +241,7 @@ namespace StudentProject.Service.ServiceImpl
                 }
                 catch(Exception e)
                 {
-                    throw new Exception("student object have some null value ");
+                    throw new StudentNotFoundException("No Student Assigned to some Address");
                 }
             }
             return ans;
@@ -249,8 +249,8 @@ namespace StudentProject.Service.ServiceImpl
 
         public List<CourseResponseDto> GetAllCoursesByStudent(string emailId)
         {
-            string sqlQuery = "SELECT * FROM students s WHERE s.EmailId=" + emailId ;
-            Student student = schoolDbContext.Students.FromSqlRaw(sqlQuery).First();
+            string sqlQuery = "SELECT * FROM students s WHERE s.EmailId='" + emailId + "'" ;
+            Student? student = schoolDbContext.Students.FromSqlRaw(sqlQuery).Include(x=>x.StudentCourses).ThenInclude(c=>c.course).ThenInclude(c=>c.teacher).FirstOrDefault();
             if (student == null)
             {
                 throw new StudentNotFoundException("No student found with email " + emailId);
@@ -260,6 +260,43 @@ namespace StudentProject.Service.ServiceImpl
             foreach(StudentCourse courseByStudent in student.StudentCourses)
             {
                 ans.Add(CourseTransformer.CourseToCourseResponseDto(courseByStudent.course));
+            }
+            return ans;
+        }
+
+        public List<StudentResponseDto> GetStudentWhoIsInStandardAndDoingCourseByTeacher(string standardName, string teacherName)
+        {
+            string sqlQuery = "SELECT * FROM standards s WHERE s.StandardName='"+standardName+"'";
+            Standard? standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).Include(s => s.Students).ThenInclude(s=>s.StudentCourses).FirstOrDefault();
+            if (standard == null)
+            {
+                throw new StandardNotFoundException("Standar Not found");
+            }
+            List<Student> students = standard.Students.ToList();
+
+            sqlQuery = "SELECT * FROM teachers t WHERE t.TeacherName='" +teacherName+ "'";
+            Teacher? teacher = schoolDbContext.Teachers.FromSqlRaw(sqlQuery).Include(t => t.Courses).ThenInclude(c=>c.StudentCourses).FirstOrDefault();
+            if (teacher == null)
+            {
+                throw new TeacherNotFoundException("Teacher doenst exist with teacher name" + teacherName);
+            }
+
+            List<Course> courses = teacher.Courses.ToList();
+
+            List<StudentResponseDto> ans = new();
+
+            foreach(Course course in courses)
+            {
+                foreach(Student student in students)
+                {
+                    foreach(StudentCourse courseByStudent in student.StudentCourses.ToList())
+                    {
+                        if (courseByStudent.course.CourseName!.Equals(course.CourseName))
+                        {
+                            ans.Add(StudentTransformer.StudentToStudentResponseDto(student));
+                        }
+                    }
+                }
             }
             return ans;
         }

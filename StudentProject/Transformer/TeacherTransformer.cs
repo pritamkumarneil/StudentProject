@@ -4,7 +4,7 @@ using StudentProject.Models;
 
 namespace StudentProject.Transformer
 {
-    public class TeacherTransformer
+    public static class TeacherTransformer
     {
         public static Teacher TeacherRequestDtoToTeacher(TeacherRequestDto teacherRequestDto)
         {
@@ -20,7 +20,7 @@ namespace StudentProject.Transformer
         {
             TeacherResponseDto teacherResponseDto=new TeacherResponseDto();
             teacherResponseDto.TeacherName=teacher.TeacherName;
-            teacherResponseDto.StandardName = teacher.standard.StandardName;
+            teacherResponseDto.StandardName = teacher.standard==null?" ":teacher.standard.StandardName;
             teacherResponseDto.Sbuject = teacher.Subject!;
 
             return teacherResponseDto;

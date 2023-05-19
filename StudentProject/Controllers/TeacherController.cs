@@ -55,12 +55,12 @@ namespace StudentProject.Controllers
                 return BadRequest(e.Message);
             }
         }
-        [HttpGet("teachers-from-standardId")]
-        public async Task<ActionResult<IEnumerable<TeacherResponseDto>>> GetTeachersByStandardId(int id)
+        [HttpGet("teachers-from-standarName")]
+        public async Task<ActionResult<IEnumerable<TeacherResponseDto>>> GetTeachersByStandardId(string standardName)
         {
             try
             {
-                List<TeacherResponseDto> teachers = teacherService.GetAllTeacherOfGivenStandard(id);
+                List<TeacherResponseDto> teachers = teacherService.GetAllTeacherOfGivenStandard(standardName);
                 return Ok(teachers);
             }
             catch(Exception e)
@@ -79,6 +79,19 @@ namespace StudentProject.Controllers
             catch(Exception e)
             {
                 return BadRequest(e.Message);
+            }
+        }
+        [HttpGet("get-all-student-by-teacher-emailId")]
+        public async Task<ActionResult<IEnumerable<StudentResponseDto>>> getAllStudentsTaughtByTeacher(string emailId)
+        {
+            try
+            {
+                List<StudentResponseDto> students = teacherService.getAllStudentsTaughtByTeacher(emailId);
+                return Ok(students);
+            }
+            catch(Exception e)
+            {
+                return NotFound(e.Message);
             }
         }
     }

@@ -19,7 +19,7 @@ namespace StudentProject.Service.ServiceImpl
         {
             //first get the standard id from request Dto
             int standardId = request.StandardId;
-            Standard standard=schoolDbContext.Standards.Find(standardId);
+            Standard? standard=schoolDbContext.Standards.Find(standardId);
             if (standard == null)
             {
                 throw new StandardNotFoundException("Please Enter Valid StandardId");
@@ -40,7 +40,7 @@ namespace StudentProject.Service.ServiceImpl
             Standard standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).First();
             if (standard == null)
                 throw new StandardNotFoundException("No standard available with name" + StandardName);
-            Teacher teacher = schoolDbContext.Teachers.Find(teacherId);
+            Teacher? teacher = schoolDbContext.Teachers.Find(teacherId);
             if (teacher == null)
                 throw new TeacherNotFoundException("Teacher Doesn't exist with given" + teacherId);
             teacher.standard = standard;
@@ -55,6 +55,24 @@ namespace StudentProject.Service.ServiceImpl
             return teacher.TeacherName + " Added Successfully to " + StandardName;
         }
 
+        List<StudentResponseDto> ITeacherService.getAllStudentsTaughtByTeacher(string emailId)
+        {
+            string sqlQuery = "SELECT * FROM teachers t WHERE t.EmailId='" + emailId + "'";
+            Teacher? teacher = schoolDbContext.Teachers.FromSqlRaw(sqlQuery).Include(t => t.standard).ThenInclude(s => s.Students).FirstOrDefault();
+
+            if (teacher == null)
+            {
+                throw new TeacherNotFoundException("No teacher Found with emailId: " + emailId);
+            }
+            List<Student> students = teacher.standard.Students.ToList();
+            List<StudentResponseDto> ans = new();
+            foreach(Student student in students)
+            {
+                ans.Add(StudentTransformer.StudentToStudentResponseDto(student)) ;
+            }
+            return ans;
+        }
+
         List<TeacherResponseDto> ITeacherService.GetAllTeacher()
         {
             List<Teacher> teachers = schoolDbContext.Teachers.ToList();
@@ -63,19 +81,26 @@ namespace StudentProject.Service.ServiceImpl
             return ans;
         }
 
-        List<TeacherResponseDto> ITeacherService.GetAllTeacherOfGivenStandard(int standardId)
+        List<TeacherResponseDto> ITeacherService.GetAllTeacherOfGivenStandard(string standardName)
         {
             if (schoolDbContext.Standards == null)
                 throw new NoStandardsAvailableException("No standards Found Yet");
-            Standard standard = schoolDbContext.Standards.Find(standardId)!;
+
+            string sqlQuery = "SELECT * FROM standards s WHERE s.StandardName='" + standardName + "'";
+            Standard? standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).Include(s=>s.Teachers).FirstOrDefault();
+
             if (standard == null) 
                 throw new StandardNotFoundException("please enter valid standardId");
-            List<Teacher> teachers = schoolDbContext.Teachers.ToList();
+
+            List<Teacher> teachers = schoolDbContext.Teachers.Include(t=>t.standard).ToList();
+
             List<TeacherResponseDto> ans = new List<TeacherResponseDto>();
             foreach (Teacher teacher in teachers)
             {
-                if(standard.Equals(teacher.standard))
-                ans.Add(TeacherTransformer.TeacherToTeacherResponseDto(teacher));
+                if (standard.Equals(teacher.standard))
+                { 
+                    ans.Add(TeacherTransformer.TeacherToTeacherResponseDto(teacher));
+                }
             }
             return ans;
 
@@ -83,7 +108,7 @@ namespace StudentProject.Service.ServiceImpl
 
         TeacherResponseDto ITeacherService.GetTeacherById(int id)
         {
-            Teacher teacher = schoolDbContext.Teachers.Find(id);
+            Teacher? teacher = schoolDbContext.Teachers.Find(id);
             if (teacher == null)
                 throw new TeacherNotFoundException("Please Enter Valid TeacherId");
             return TeacherTransformer.TeacherToTeacherResponseDto(teacher);

@@ -10,7 +10,7 @@ namespace StudentProject.Service.ServiceImpl
 {
     public class CourseService : ICourseService
     {
-        private SchoolDbContext schoolDbContext;
+        private readonly SchoolDbContext schoolDbContext;
         public CourseService(SchoolDbContext schoolDb)
         {
             this.schoolDbContext = schoolDb;
@@ -20,7 +20,7 @@ namespace StudentProject.Service.ServiceImpl
             // while adding the course you should also update the StudentCourse table 
 
             int teacherId = courseRequestDto.TeacherId;
-            Teacher teacher = schoolDbContext.Teachers.Find(teacherId);
+            Teacher? teacher = schoolDbContext.Teachers.Find(teacherId);
             if (teacher == null)
                 throw new TeacherNotFoundException("Teacher Doesn't exist with given TeacherId");
 
@@ -43,7 +43,7 @@ namespace StudentProject.Service.ServiceImpl
         {
             if (schoolDbContext.Courses == null)
                 throw new CourseNotFound("No Course Available");
-            List<Course> courses = schoolDbContext.Courses.ToList();
+            List<Course> courses = schoolDbContext.Courses.Include(x=>x.teacher).ToList();
             List<CourseResponseDto> courseResponseDtos = new List<CourseResponseDto>();
             foreach (Course course in courses)
                 courseResponseDtos.Add(CourseTransformer.CourseToCourseResponseDto(course));
@@ -55,7 +55,7 @@ namespace StudentProject.Service.ServiceImpl
         {
              if(schoolDbContext.Courses == null)
                 throw new CourseNotFound("No Course Available");
-            Course course = schoolDbContext.Courses.Where(x=>x.CourseId==id).Include(x => x.teacher).FirstOrDefault();
+            Course? course = schoolDbContext.Courses.Where(x=>x.CourseId==id).Include(x => x.teacher).FirstOrDefault();
             if (course == null)
                 throw new CourseNotFound("No course Available with given Id");
             return CourseTransformer.CourseToCourseResponseDto(course);
@@ -82,6 +82,22 @@ namespace StudentProject.Service.ServiceImpl
                 ans.Add(CourseTransformer.CourseToCourseResponseDto(course));
             }
             return ans;
+        }
+
+        public List<StudentResponseDto> GetAllStudentsByCourseName(string courseName)
+        {
+            string sqlQuery = "SELECT * FROM courses c WHERE c.CourseName='" + courseName + "'";
+            Course? course = schoolDbContext.Courses.FromSqlRaw(sqlQuery).Include(x => x.StudentCourses).ThenInclude(sc => sc.student).FirstOrDefault();
+            if (course == null)
+            {
+                throw new CourseNotFound("No course with name " + courseName + " found.");
+            }
+            List<StudentResponseDto> students = new List<StudentResponseDto>();
+            foreach(StudentCourse courseByStudet in course.StudentCourses.ToList())
+            {
+                students.Add(StudentTransformer.StudentToStudentResponseDto(courseByStudet.student));
+            }
+            return students;
         }
     }
 }

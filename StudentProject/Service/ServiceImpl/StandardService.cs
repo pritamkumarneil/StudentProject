@@ -11,7 +11,7 @@ namespace StudentProject.Service.ServiceImpl
 {
     public class StandardService  : IStandardService
     {
-        private SchoolDbContext schoolDbContext;
+        private readonly SchoolDbContext schoolDbContext;
         public StandardService(SchoolDbContext schoolDb)
         {
            this.schoolDbContext = schoolDb;
@@ -32,12 +32,16 @@ namespace StudentProject.Service.ServiceImpl
         {
             if (schoolDbContext.Standards == null)
                 throw new NoStandardsAvailableException("No standard Added yet");
-            string sqlQuery = "SELECT * FROM standards s WHERE s.StandardName=" + standardName;
-            Standard standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).First();
+            string sqlQuery = "SELECT * FROM standards s WHERE s.StandardName='" + standardName+"'";
+            Standard? standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).FirstOrDefault();
+            if (standard == null)
+            {
+                throw new StandardNotFoundException("standard wiht name " + standardName + " Not found");
+            }
 
             if (schoolDbContext.Students == null)
                 throw new StudentNotFoundException("Please add Student First");
-            Student student = schoolDbContext.Students.Find(studentId);
+            Student? student = schoolDbContext.Students.Find(studentId);
             if (student == null)
                 throw new StudentNotFoundException("Student Not found");
             // if both found then add eachother to eachother
@@ -62,7 +66,11 @@ namespace StudentProject.Service.ServiceImpl
             if (schoolDbContext.Standards == null)
                 throw new NoStandardsAvailableException("No standard Added yet");
             sqlQuery = "SELECT * FROM standards s WHERE s.StandardName=" + standardName;
-            Standard standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).FirstOrDefault();
+            Standard? standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).FirstOrDefault();
+            if (standard == null)
+            {
+                throw new StandardNotFoundException("standard Name " + standardName + " is Not yet Added");
+            }
 
             // after finding both teacher and standard add eachother into eachOther
             standard.Teachers.Add(teacher);
@@ -76,12 +84,12 @@ namespace StudentProject.Service.ServiceImpl
         public List<StudentResponseDto> GetAllStudentsFromStandard(string standardName)
         { 
             string sqlQuery = "SELECT * FROM standards s WHERE s.StandardName=" + standardName;
-            Standard standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).Include(x => x.Students).FirstOrDefault();
+            Standard? standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).Include(x => x.Students).FirstOrDefault();
             if (standard == null)
                 throw new NoStandardsAvailableException("No standard availabe with name " + standardName);
             List<Student> students = standard.Students.ToList();
             if (students.Count == 0)
-                throw new Exception("List not updated to db "+standard.Students.Count);
+                throw new StudentNotFoundException("No Students are There yet in this Standard");
 
             List<StudentResponseDto> ans = new List<StudentResponseDto>();
             foreach(Student student in students)
@@ -94,13 +102,12 @@ namespace StudentProject.Service.ServiceImpl
         public List<TeacherResponseDto> GetAllTeachersFromStandard(string standardName)
         {
             string sqlQuery = "SELECT * FROM standards s WHERE s.StandardName=" + standardName;
-            Standard standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).Include(x=>x.Teachers).FirstOrDefault();
+            Standard? standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).Include(x=>x.Teachers).FirstOrDefault();
             if (standard == null)
                 throw new NoStandardsAvailableException("No standard availabe with name " + standardName);
-            List<Teacher> teachers = standard.Teachers.ToList();
-            if (teachers == null)
-                throw new TeacherNotFoundException("No Teachers Found in " + standardName);
-
+            
+            List<Teacher> teachers = standard.Teachers.ToList() ?? throw new TeacherNotFoundException("No Teachers Found in " + standardName);
+            
             List<TeacherResponseDto> ans = new List<TeacherResponseDto>();
             foreach(Teacher teacher in teachers)
             {

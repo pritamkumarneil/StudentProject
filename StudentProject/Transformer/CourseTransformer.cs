@@ -4,7 +4,7 @@ using StudentProject.Models;
 
 namespace StudentProject.Transformer
 {
-    public class CourseTransformer
+    public static class CourseTransformer
     {
         public static Course CourseRequestDtoToCourse(CourseRequestDto courseRequestDto)
         {
@@ -17,8 +17,8 @@ namespace StudentProject.Transformer
         {
             CourseResponseDto courseResponse=new CourseResponseDto();
 
-            courseResponse.CourseName = course.CourseName;
-            courseResponse.TeacherName = course.teacher.TeacherName;
+            courseResponse.CourseName = course.CourseName!;
+            courseResponse.TeacherName = course.teacher==null?" ":course.teacher.TeacherName;
             return courseResponse;
         }
     }

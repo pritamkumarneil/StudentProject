@@ -4,13 +4,13 @@ using StudentProject.Models;
 
 namespace StudentProject.Transformer
 {
-    public class StudentTransformer
+    public static class StudentTransformer
     {
-        /*private static int Id { get; set; }=0;*/
+        
         public static Student StudentRequestDtoToStudent(StudentRequestDto studentRequestDto)
         {
             Student student = new Student();
-           /* student.Id =Id++;*/
+ 
             student.Name=studentRequestDto.Name;
             student.StudentDateOfBirth = studentRequestDto.StudentDateOfBirth;
             student.Branch= studentRequestDto.Branch;
@@ -25,7 +25,7 @@ namespace StudentProject.Transformer
             StudentResponseDto studentResponseDto = new StudentResponseDto();
 
             studentResponseDto.RollNo = student.RollNo;
-            studentResponseDto.Name = student.Name;
+            studentResponseDto.Name = student.Name!;
             studentResponseDto.StandardName = student.Standard==null? "":student.Standard.StandardName;
 
             return studentResponseDto;

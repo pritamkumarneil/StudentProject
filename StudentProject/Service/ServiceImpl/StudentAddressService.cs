@@ -23,15 +23,15 @@ namespace StudentProject.Service.ServiceImpl
             string standardName = addressRequestDto.standardName;
             int rollNo = addressRequestDto.StudentRollNo;
             string sqlQuery = "SELECT * FROM standards s WHERE s.StandardName="+standardName;
-            Standard standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).Include(x=>x.Students).FirstOrDefault();
-            Student student = null;
+            Standard? standard = schoolDbContext.Standards.FromSqlRaw(sqlQuery).Include(x=>x.Students).FirstOrDefault();
+            Student? student = null;
             if(standard==null)
             {
                 throw new StandardNotFoundException("Please Enter Valid StandardName");
             }
             List<Student> students = standard.Students.ToList();
             if (students.Count == 0)
-                throw new Exception("student couldn't saved to standard list");
+                throw new StudentNotFoundException("student couldn't saved to standard list or No Student is availabe with given detail");
             foreach(Student student1 in students)
             {
                 if (student1.RollNo == rollNo)
@@ -75,7 +75,7 @@ namespace StudentProject.Service.ServiceImpl
             if (schoolDbContext.StudentAddresses == null)
                 throw new AddressNotFound("No Address Available Yet");
 
-            string sqlQuery = "SELECT * FROM studentaddresses s WHERE s.PinCode="+pinCode.ToString();
+            string sqlQuery = "SELECT * FROM studentaddresses s WHERE s.PinCode=" + pinCode;//.ToString();
             List<StudentAddress> addresses = schoolDbContext.StudentAddresses.FromSqlRaw(sqlQuery).ToList();
 
             List<AddressResponseDto> ans = new List<AddressResponseDto>();
@@ -91,7 +91,7 @@ namespace StudentProject.Service.ServiceImpl
             if (schoolDbContext.StudentAddresses == null)
                 throw new AddressNotFound("No Address Available Yet");
 
-            string sqlQuery = "SELECT * FROM studentaddresses s WHERE s.PinCode=" +city;
+            string sqlQuery = "SELECT * FROM studentaddresses s WHERE s.City='" +city+"'";
             List<StudentAddress> addresses = schoolDbContext.StudentAddresses.FromSqlRaw(sqlQuery).Include(x => x.student).ToList();
 
             List<StudentResponseDto> ans = new List<StudentResponseDto>();

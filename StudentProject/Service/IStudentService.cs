@@ -18,5 +18,7 @@ namespace StudentProject.Service
         public List<StudentResponseDto> GetAllStudentFromCity(string city);
         // get all courses opted by the student(by emailId)
         public List<CourseResponseDto> GetAllCoursesByStudent(string emailId);
+        // get student who is in given standard and is Doing Course from given Teacher
+        public List<StudentResponseDto> GetStudentWhoIsInStandardAndDoingCourseByTeacher(string standardName, string teacherName);
     }
 }

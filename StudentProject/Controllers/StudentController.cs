@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using StudentProject.Dto.RequestDto;
 using StudentProject.Dto.ResponseDto;
 using StudentProject.Service;
+using System.ComponentModel;
 
 namespace StudentProject.Controllers
 {
@@ -94,5 +95,32 @@ namespace StudentProject.Controllers
             }
         }
         // get all courses opted by the student(by emailId)
+        [HttpGet("get-all-courses-by-student")]
+
+        public async Task<ActionResult<IEnumerable<CourseResponseDto>>> GetAllCoursesByStudent(string emailId)
+        {
+            try
+            {
+                List<CourseResponseDto> courses = studentService.GetAllCoursesByStudent(emailId);
+                return Ok(courses);
+            }
+            catch(Exception e)
+            {
+                return NotFound(e.Message);
+            }
+        }
+        [HttpGet("getStudentsWhoIsDoingCourseByTeacher")]
+        public async Task<ActionResult<IEnumerable<StudentResponseDto>>> GetStudentWhoIsInStandardAndDoingCourseByTeacher(string standardName, string teacherName)
+        {
+            try
+            {
+                List<StudentResponseDto> students = studentService.GetStudentWhoIsInStandardAndDoingCourseByTeacher(standardName, teacherName);
+                return Ok(students);
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

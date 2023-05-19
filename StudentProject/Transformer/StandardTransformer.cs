@@ -4,7 +4,7 @@ using StudentProject.Models;
 
 namespace StudentProject.Transformer
 {
-    public class StandardTransformer
+    public static class StandardTransformer
     {
         public static Standard StandardRequestDtoToStandard(StandardRequestDto standardRequestDto)
         {
@@ -15,9 +15,9 @@ namespace StudentProject.Transformer
         }
         public static StandardResponseDto StandardToStandardResponseDto(Standard standard)
         {
-            StandardResponseDto standardResponseDto = new StandardResponseDto();
+            StandardResponseDto standardResponseDto = new();
             standardResponseDto.StandardName = standard.StandardName;
-            standardResponseDto.Message =" ";
+            standardResponseDto.Message = " ";
             return standardResponseDto;
 
         }
