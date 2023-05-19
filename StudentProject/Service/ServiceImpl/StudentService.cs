@@ -58,7 +58,7 @@ namespace StudentProject.Service.ServiceImpl
                 studentResponseDto.message = "Student Doesnt Exist";
                 return studentResponseDto;
             }
-            Student? student = schoolDbContext.Students.Find(id);
+            Student? student = schoolDbContext.Students.Where(s=>s.Id==id).Include(s=>s.Standard).FirstOrDefault();
 
             if (student == null)
             {
@@ -109,7 +109,7 @@ namespace StudentProject.Service.ServiceImpl
             {
                 return new List<StudentResponseDto>();
             }
-            List<Student> students = schoolDbContext.Students.ToList();
+            List<Student> students = schoolDbContext.Students.Include(s=>s.Standard).ToList();
             if (students == null)
             {
                 return new List<StudentResponseDto>();

@@ -82,5 +82,18 @@ namespace StudentProject.Controllers
                 return NotFound(e.Message);
             }
         }
+        [HttpGet("getAllStudentsFromCityWhoAreDoingCourse")]
+        public async Task<ActionResult<IEnumerable<StudentResponseDto>>> GetAllStudentsFromCityDoingThisCourse(string city, string courseName)
+        {
+            try
+            {
+                List<StudentResponseDto> students = courseService.GetAllStudentsFromCityDoingThisCourse(city, courseName);
+                return Ok(students);
+            }
+            catch(Exception e)
+            {
+                return NotFound(e.Message);
+            }
+        }
     }
 }

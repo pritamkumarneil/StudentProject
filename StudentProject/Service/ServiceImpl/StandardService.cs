@@ -131,5 +131,33 @@ namespace StudentProject.Service.ServiceImpl
             return ans;
 
         }
+
+        List<StudentResponseDto> IStandardService.GetAllStudentsFromCityInStandard(string city, string standardName)
+        {
+            // we can perform join operation also using LINQ or SQL query but going with oldScholl method
+            string sqlQuery = "SELECT * FROM studentaddresses sa WHERE sa.City='" + city + "'";
+            List<StudentAddress> addresses = schoolDbContext.StudentAddresses.FromSqlRaw(sqlQuery).Include(x => x.student).ToList();
+
+
+            Standard? standard = schoolDbContext.Standards.Where(x => x.StandardName.Equals(standardName)).Include(s => s.Students).FirstOrDefault();
+
+            if (standard == null)
+            {
+                throw new StandardNotFoundException("standar with name " + standardName + " Not found");
+            }
+
+            List<StudentResponseDto> students = new();
+            foreach(StudentAddress address in addresses)
+            {
+                foreach(Student student in standard.Students.ToList())
+                {
+                    if (student.Equals(address.student))
+                    {
+                        students.Add(StudentTransformer.StudentToStudentResponseDto(student));
+                    }
+                }
+            }
+            return students;
+        }
     }
 }

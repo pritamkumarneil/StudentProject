@@ -17,5 +17,8 @@ namespace StudentProject.Service
         /*public string AddStudentToStandard(string standardName, int studentId);*/
         // add Teacher to Standard(teacher mobNO,standardName)
         public string AddTeacherToStandard(string mobNo, string standardName);
+
+        // find all student from given city and from given standardName
+        public List<StudentResponseDto> GetAllStudentsFromCityInStandard(string city, string standardName);
     }
 }

@@ -109,8 +109,9 @@ namespace StudentProject.Controllers
                 return NotFound(e.Message);
             }
         }
-        [HttpGet("getStudentsWhoIsDoingCourseByTeacher")]
-        public async Task<ActionResult<IEnumerable<StudentResponseDto>>> GetStudentWhoIsInStandardAndDoingCourseByTeacher(string standardName, string teacherName)
+        // 
+        [HttpGet("getStudentsWhoAreDoingCourseByTeacher")]
+        public async Task<ActionResult<IEnumerable<StudentResponseDto>>> GetStudentWhoAreInStandardAndDoingCourseByTeacher(string standardName, string teacherName)
         {
             try
             {

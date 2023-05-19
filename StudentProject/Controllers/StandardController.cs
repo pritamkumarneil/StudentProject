@@ -81,6 +81,18 @@ namespace StudentProject.Controllers
                 return BadRequest(e.Message);
             }
         }
-
+        [HttpGet("GetAllStudentInStandardFromCity")]
+        public async Task<ActionResult<IEnumerable<StudentResponseDto>>> GetAllStudentsFromCityInStandard(string city, string standardName)
+        {
+            try
+            {
+                List<StudentResponseDto> students = standardService.GetAllStudentsFromCityInStandard(city, standardName);
+                return Ok(students);
+            }
+            catch(Exception e)
+            {
+                return NotFound(e.Message);
+            }
+        }
     }
 }

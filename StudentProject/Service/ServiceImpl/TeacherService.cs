@@ -10,7 +10,7 @@ namespace StudentProject.Service.ServiceImpl
 {
     public class TeacherService : ITeacherService
     {
-        private SchoolDbContext schoolDbContext;
+        private readonly SchoolDbContext schoolDbContext;
         public TeacherService(SchoolDbContext schoolDb) 
         {
             this.schoolDbContext = schoolDb;

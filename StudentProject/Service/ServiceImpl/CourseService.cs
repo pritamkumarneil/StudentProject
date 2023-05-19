@@ -99,5 +99,40 @@ namespace StudentProject.Service.ServiceImpl
             }
             return students;
         }
+
+        List<StudentResponseDto> ICourseService.GetAllStudentsFromCityDoingThisCourse(string city, string courseName)
+        {
+            string sqlQuery = "SELECT * FROM studentaddresses sa WHERE sa.City='"+city+"'";
+            List<StudentAddress> addresses;
+            try
+            {
+                addresses = schoolDbContext.StudentAddresses.FromSqlRaw(sqlQuery).Include(a => a.student).ToList();
+            }
+            catch(Exception e)
+            {
+                throw new AddressNotFound("No students are from given city " + city);
+            }
+
+            sqlQuery = "SELECT * FROM courses c WHERE c.CourseName='"+courseName+"'";
+            Course? course = schoolDbContext.Courses.FromSqlRaw(sqlQuery).Include(c => c.StudentCourses).ThenInclude(sc=>sc.student).FirstOrDefault();
+
+            if (course == null)
+            {
+                throw new CourseNotFound("Course with name " + courseName + " doesn't Exist");
+            }
+            List<StudentResponseDto> students = new();
+
+            foreach(StudentAddress address in  addresses)
+            {
+                foreach(StudentCourse courseByStudent in course.StudentCourses.ToList())
+                {
+                    if (address.student.Equals(courseByStudent.student))
+                    {
+                        students.Add(StudentTransformer.StudentToStudentResponseDto(address.student));
+                    }
+                }
+            }
+            return students;
+        }
     }
 }
